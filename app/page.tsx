@@ -1,103 +1,229 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useState, useEffect } from "react";
+import { useAuth } from "@/lib/auth";
+import Header from "@/components/layout/Header";
+import AuthModal from "@/components/features/auth/AuthModal";
+import DataManagement from "@/components/features/data/DataManagement";
+import { Toaster } from "@/components/ui/sonner";
+import {
+  mockFinancialData,
+  mockProjectHours,
+  mockClientEarnings,
+  mockCashFlowData,
+} from "@/lib/mock-data";
+import { toast } from "sonner";
+import ClientEarningsChart from "@/components/features/charts/ClientEarningsChart";
+import ProjectHoursChart from "@/components/features/charts/ProjectHoursChart";
+import IncomeExpensesChart from "@/components/features/charts/IncomeExpensesChart";
+import CashFlowChart from "@/components/features/charts/CashFlowChart";
+import ControlPanel from "@/components/features/dashboard/ControlPanel";
+import StatsCards from "@/components/features/dashboard/StatsCards";
+import { DataStorage } from "@/lib/data-storage";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+export default function Dashboard() {
+  const { user, isLoading } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showDataManagement, setShowDataManagement] = useState(false);
+  const [chartType, setChartType] = useState<string>("bar");
+  const [timeRange, setTimeRange] = useState("6m");
+
+  // Data state
+  const [financialData, setFinancialData] = useState(mockFinancialData);
+  const [projectHours, setProjectHours] = useState(mockProjectHours);
+  const [clientEarnings, setClientEarnings] = useState(mockClientEarnings);
+  const [cashFlowData, setCashFlowData] = useState(mockCashFlowData);
+
+  // Load user data when authenticated
+  useEffect(() => {
+    if (user) {
+      const savedData = DataStorage.loadDashboardData(user.id);
+      if (savedData) {
+        setFinancialData(
+          savedData.financial.length > 0
+            ? savedData.financial
+            : mockFinancialData
+        );
+        setProjectHours(
+          savedData.projects.length > 0 ? savedData.projects : mockProjectHours
+        );
+        setClientEarnings(
+          savedData.clients.length > 0 ? savedData.clients : mockClientEarnings
+        );
+        setCashFlowData(
+          savedData.cashflow.length > 0 ? savedData.cashflow : mockCashFlowData
+        );
+        toast.success("Dashboard data loaded successfully");
+      }
+    }
+  }, [user]);
+
+  // Save data when it changes (if user is authenticated)
+  useEffect(() => {
+    if (user) {
+      const dashboardData = {
+        financial: financialData,
+        projects: projectHours,
+        clients: clientEarnings,
+        cashflow: cashFlowData,
+        lastUpdated: new Date().toISOString(),
+      };
+      DataStorage.saveDashboardData(user.id, dashboardData);
+    }
+  }, [user, financialData, projectHours, clientEarnings, cashFlowData]);
+
+  // Show auth modal if not authenticated and not loading
+  useEffect(() => {
+    if (!isLoading && !user) {
+      setShowAuthModal(true);
+    }
+  }, [user, isLoading]);
+
+  const handleExport = () => {
+    if (!user) {
+      toast.error("Please sign in to export data");
+      return;
+    }
+
+    const data = DataStorage.exportData(user.id);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `freelance-dashboard-${
+      new Date().toISOString().split("T")[0]
+    }.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast.success("Dashboard exported successfully!", {
+      description: "Your financial report has been downloaded as JSON.",
+    });
+  };
+
+  const handleImport = () => {
+    if (!user) {
+      toast.error("Please sign in to import data");
+      return;
+    }
+    setShowDataManagement(true);
+  };
+
+  const handleDataManagement = () => {
+    if (!user) {
+      toast.error("Please sign in to manage data");
+      return;
+    }
+    setShowDataManagement(true);
+  };
+
+  const handleRefresh = () => {
+    if (user) {
+      const savedData = DataStorage.loadDashboardData(user.id);
+      if (savedData) {
+        setFinancialData(savedData.financial);
+        setProjectHours(savedData.projects);
+        setClientEarnings(savedData.clients);
+        setCashFlowData(savedData.cashflow);
+      }
+    }
+    toast.success("Data refreshed!", {
+      description:
+        "Dashboard data has been updated with the latest information.",
+    });
+  };
+
+  const handleDataUpdate = (
+    data: any[],
+    type: string,
+    action: "replace" | "add"
+  ) => {
+    if (!user) return;
+
+    DataStorage.updateData(user.id, data, type, action);
+
+    // Update local state
+    const savedData = DataStorage.loadDashboardData(user.id);
+    if (savedData) {
+      setFinancialData(savedData.financial);
+      setProjectHours(savedData.projects);
+      setClientEarnings(savedData.clients);
+      setCashFlowData(savedData.cashflow);
+    }
+
+    toast.success(
+      `${type} data ${
+        action === "replace" ? "imported" : "added"
+      } successfully!`
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </div>
+    );
+  }
+
+  return (
+    <main className="container mx-auto px-4 py-8 space-y-8">
+      {/* Welcome Message */}
+      <section className="text-center py-4">
+        <h2 className="text-2xl font-bold mb-2">Welcome back, test!</h2>
+        <p className="text-muted-foreground">
+          Here&apos;s your freelance business overview
+        </p>
+      </section>
+
+      {/* Stats Overview */}
+      <section>
+        <StatsCards
+          financialData={financialData}
+          clientEarnings={clientEarnings}
+          projectHours={projectHours}
+        />
+      </section>
+
+      {/* Control Panel */}
+      <section>
+        <ControlPanel
+          chartType={chartType}
+          onChartTypeChange={setChartType}
+          timeRange={timeRange}
+          onTimeRangeChange={setTimeRange}
+          onRefresh={handleRefresh}
+        />
+      </section>
+
+      {/* Charts Grid */}
+      <section className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {/* Income vs Expenses - Full Width */}
+        <div className="xl:col-span-2">
+          <IncomeExpensesChart data={financialData} viewType={chartType} />
+        </div>
+
+        {/* Project Hours */}
+        <ProjectHoursChart data={projectHours} />
+
+        {/* Client Earnings */}
+        <ClientEarningsChart data={clientEarnings} />
+
+        {/* Cash Flow - Full Width */}
+        <div className="xl:col-span-2">
+          <CashFlowChart data={cashFlowData} />
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="text-center text-sm text-muted-foreground py-8">
+        <p>
+          © 2024 FreelanceDash. Built with Next.js, Recharts, and Tailwind CSS.
+        </p>
       </footer>
-    </div>
+    </main>
   );
 }
