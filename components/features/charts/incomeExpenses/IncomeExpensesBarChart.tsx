@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import ReusableTooltip from "@/components/features/charts/common/CustomTooltip";
-import RenderTooltipContent from "@/components/features/charts/incomeExpenses/RenderTooltipContent";
+import RenderTooltipContent from "@/components/features/charts/common/RenderTooltipContent";
 
 interface IncomeExpensesBarChartProps {
   data: FinancialData[];
