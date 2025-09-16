@@ -1,4 +1,4 @@
-import { ClientEarningsData } from "@/components/features/charts/types/clientEarningsData";
+import { ClientEarningsData } from "@/types/dashboard/clientEarningsData";
 import { FunctionComponent } from "react";
 
 interface ClientEarningsSummaryProps {

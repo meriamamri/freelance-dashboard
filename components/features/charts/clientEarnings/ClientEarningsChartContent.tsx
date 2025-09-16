@@ -2,7 +2,7 @@ import { CardContent } from "@/components/ui/card";
 import ClientEarningsBarChart from "@/components/features/charts/clientEarnings/ClientEarningsBarChart";
 import ClientEarningsSummary from "@/components/features/charts/clientEarnings/ClientEarningsSummary";
 import { FunctionComponent } from "react";
-import { ClientEarningsData } from "@/components/features/charts/types/clientEarningsData";
+import { ClientEarningsData } from "@/types/dashboard/clientEarningsData";
 
 interface ClientEarningsChartContentProps {
     data: ClientEarningsData[];

@@ -10,8 +10,8 @@ import {
 import ReusableTooltip from "@/components/features/charts/common/CustomTooltip";
 import RenderTooltipContent from "@/components/features/charts/common/RenderTooltipContent";
 import { FunctionComponent } from "react";
-import { ClientEarningsData } from "@/components/features/charts/types/clientEarningsData";
-import { ClientEarningsPayloadType } from "@/components/features/charts/types/clientEarningspayloadType";
+import { ClientEarningsData } from "@/types/dashboard/clientEarningsData";
+import { ClientEarningsPayloadType } from "@/components/features/charts/types/clientEarningsPayloadType";
 
 interface ClientEarningsBarChartProps {
   data: ClientEarningsData[];

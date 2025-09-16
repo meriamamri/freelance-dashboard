@@ -1,7 +1,7 @@
 "use client";
 
 import { FunctionComponent, memo } from "react";
-import { ClientEarningsData } from "@/components/features/charts/types/clientEarningsData";
+import { ClientEarningsData } from "@/types/dashboard/clientEarningsData";
 import { Card } from "@/components/ui/card";
 import ClientEarningsChartHeader from "@/components/features/charts/clientEarnings/ClientEarningsChartHeader";
 import ClientEarningsChartContent from "@/components/features/charts/clientEarnings/ClientEarningsChartContent";

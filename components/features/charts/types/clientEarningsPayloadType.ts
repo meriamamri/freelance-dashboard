@@ -1,4 +1,4 @@
-import { ClientEarningsData } from "./clientEarningsData";
+import { ClientEarningsData } from "../../../../types/dashboard/clientEarningsData";
 
 export interface ClientEarningsPayloadType {
   name: string;
