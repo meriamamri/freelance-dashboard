@@ -1,6 +1,6 @@
 import { ClientEarningsData } from "./clientEarningsData";
 
-export interface PayloadType {
+export interface ClientEarningsPayloadType {
   name: string;
   value: number;
   color: string;

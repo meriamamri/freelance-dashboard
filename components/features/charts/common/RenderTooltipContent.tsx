@@ -1,10 +1,8 @@
-import { PayloadType } from "@/components/features/charts/types/payloadType";
-
-const RenderTooltipContent = ({
+const RenderTooltipContent = <T extends { name: string; value: number; color: string }>({
   payload,
   label,
 }: {
-  payload?: PayloadType[];
+  payload?: T[];
   label?: string;
 }) => {
   if (!payload) return null;
@@ -16,9 +14,9 @@ const RenderTooltipContent = ({
           {entry.name}: ${entry.value.toLocaleString()}
         </p>
       ))}
-      {payload && payload && (
+      {payload && payload.length >= 2 && (
         <p className="text-sm font-medium text-muted-foreground border-t pt-1 mt-1">
-          Net: ${(payload[0].value - payload[0].value).toLocaleString()}
+          Net: ${(payload[0].value - payload[1].value).toLocaleString()}
         </p>
       )}
     </>

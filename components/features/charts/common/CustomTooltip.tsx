@@ -1,12 +1,11 @@
-import { PayloadType } from "@/components/features/charts/types/payloadType";
-
-interface ReusableTooltipProps {
+interface ReusableTooltipProps<T> {
   active?: boolean;
-  payload?: PayloadType[];
+  payload?: T[];
   label?: string;
   // Optionally pass totalHours, config objects, or other auxiliary data
   renderContent: (props: {
-    payload?: PayloadType[];
+    active?: boolean;
+    payload?: T[];
     label?: string;
   }) => React.ReactNode;
   className?: string;
@@ -14,7 +13,7 @@ interface ReusableTooltipProps {
   // You can add more props for needs like theme, backdrop, etc.
 }
 
-const ReusableTooltip: React.FC<ReusableTooltipProps> = ({
+const ReusableTooltip = <T,>({
   active,
   payload,
   label,
@@ -22,7 +21,7 @@ const ReusableTooltip: React.FC<ReusableTooltipProps> = ({
   className = "",
   style,
   ...restProps
-}) => {
+}: ReusableTooltipProps<T>) => {
   if (!active || !payload || !payload.length) return null;
 
   return (
@@ -30,7 +29,7 @@ const ReusableTooltip: React.FC<ReusableTooltipProps> = ({
       className={`bg-background/95 backdrop-blur-sm border rounded-lg p-3 shadow-lg ${className}`}
       style={style}
     >
-      {renderContent({ payload, label, ...restProps })}
+      {renderContent({ active, payload, label, ...restProps })}
     </div>
   );
 };

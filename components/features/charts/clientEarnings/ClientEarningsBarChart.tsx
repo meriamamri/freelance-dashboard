@@ -11,6 +11,7 @@ import ReusableTooltip from "@/components/features/charts/common/CustomTooltip";
 import RenderTooltipContent from "@/components/features/charts/common/RenderTooltipContent";
 import { FunctionComponent } from "react";
 import { ClientEarningsData } from "@/components/features/charts/types/clientEarningsData";
+import { ClientEarningsPayloadType } from "@/components/features/charts/types/clientEarningspayloadType";
 
 interface ClientEarningsBarChartProps {
   data: ClientEarningsData[];
@@ -38,7 +39,7 @@ const ClientEarningsBarChart: FunctionComponent<
         tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
       />
       <Tooltip
-        content={<ReusableTooltip renderContent={RenderTooltipContent} />}
+        content={<ReusableTooltip<ClientEarningsPayloadType> renderContent={RenderTooltipContent} />}
       />
       <Bar
         dataKey="earnings"

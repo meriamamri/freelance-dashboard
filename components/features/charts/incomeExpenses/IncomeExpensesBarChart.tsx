@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import ReusableTooltip from "@/components/features/charts/common/CustomTooltip";
 import RenderTooltipContent from "@/components/features/charts/common/RenderTooltipContent";
+import { FinancialDataPayloadType } from "@/components/features/charts/types/financialDataPayloadType";
 
 interface IncomeExpensesBarChartProps {
   data: FinancialData[];
@@ -26,7 +27,7 @@ const IncomeExpensesBarChart: FunctionComponent<
       <XAxis dataKey="month" />
       <YAxis tickFormatter={(value) => `$${value.toLocaleString()}`} />
       <Tooltip
-        content={<ReusableTooltip renderContent={RenderTooltipContent} />}
+        content={<ReusableTooltip<FinancialDataPayloadType> renderContent={RenderTooltipContent} />}
       />
       <Legend />
       <Bar
